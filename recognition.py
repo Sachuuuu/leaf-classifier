@@ -195,3 +195,35 @@ class plant_recognition:
         tflite_model = converter.convert()
         open("converted_model.tflite", "wb").write(tflite_model)
 		
+	def predict(self,img_path):
+
+        traininglabels = ['Akkapana','Cinnamon','Katupila','Kohombo','Tumeric','TumericRoot']
+
+        
+        img = cv2.imread(img_path)
+        img = cv2.resize(img,(70,70))
+        inputset = []
+        inputset.append(img)
+
+        
+        new_img = []
+        for i in inputset:
+            blurr = cv2.GaussianBlur(i,(5,5),0)
+            hsv = cv2.cvtColor(blurr,cv2.COLOR_BGR2HSV)
+            #GREEN PARAMETERS
+            lower = (25,40,50)
+            upper = (75,255,255)
+            mask = cv2.inRange(hsv,lower,upper)
+            struc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(11,11))
+            mask = cv2.morphologyEx(mask,cv2.MORPH_CLOSE,struc)
+            boolean = mask>0
+            new = np.zeros_like(i,np.uint8)
+            new[boolean] = i[boolean]
+            new_img.append(new)
+            
+        new_img = np.asarray(new_img)
+        new_img = new_img/255
+        
+        loaded_model = tf.keras.models.load_model('keras_model.h5')
+        result = loaded_model.predict_classes(new_img)
+        return(traininglabels[result[0]])
