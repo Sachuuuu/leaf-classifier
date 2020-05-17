@@ -163,9 +163,8 @@ class plant_recognition:
         self.model.summary()
         
     def train_model(self):
-	
-	    preprocess_images()
-		create_model()
+        preprocess_images()
+        create_model()
         
         print(self.x_test[0].shape)
         
